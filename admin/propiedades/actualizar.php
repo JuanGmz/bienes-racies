@@ -1,5 +1,10 @@
 <?php
-
+require '../../includes/funciones.php';
+// Esta funcion nos indica si esta autenticado
+$auth = autenticado();
+// Si no hay sesión redireccionar
+if (!$auth)
+    header('Location: /bienesraices/index.php');
 // Obtener los datos de la propiedad desde el a de actualizar
 $id = $_GET['id'];
 
@@ -97,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $nombreImagen = '';
 
         // Eliminar la imagen previa usando unlink
-        if($imagen['name']) {
+        if ($imagen['name']) {
             // Indicamos la ruta de la imagen y la elimina
             unlink($carpetaImagenes . $propiedad['imagen']);
             // Generar un nombre unico -- md5 genera un identificador unico, rand() genera un numero aleatorio, true es para que se genere en binario, .jpg es el formato
@@ -127,12 +132,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($resUpdate) {
             // Redireccionar al usuario a admin
-            header ('Location: /bienesraices/admin?resultado=2');
+            header('Location: /bienesraices/admin?resultado=2');
         }
     }
 }
-
-require '../../includes/funciones.php';
 incluirTemplate('header');
 ?>
 
@@ -188,8 +191,9 @@ incluirTemplate('header');
             <label for="vendedor">Vendedor</label>
             <select name="vendedorid" id="vendedor">
                 <option value="" selected disabled>-- Seleccione --</option>
-                <?php while($vendedor = mysqli_fetch_assoc($resultadoVendedores)): ?>
-                    <option <?php echo $vendedorid === $vendedor['vendedorID'] ? 'selected' : ''; ?> value="<?php echo $vendedor['vendedorID'] ?>">
+                <?php while ($vendedor = mysqli_fetch_assoc($resultadoVendedores)): ?>
+                    <option <?php echo $vendedorid === $vendedor['vendedorID'] ? 'selected' : ''; ?>
+                        value="<?php echo $vendedor['vendedorID'] ?>">
                         <?php echo $vendedor['nombre'] . " " . $vendedor['apellidos']; ?>
                     </option>
                 <?php endwhile; ?>

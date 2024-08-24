@@ -1,6 +1,11 @@
 <?php
 require '../../includes/config/database.php';
-
+require '../../includes/funciones.php';
+// Esta funcion nos indica si esta autenticado
+$auth = autenticado();
+// Si no hay sesión redireccionar
+if(!$auth)
+    header('Location: /bienesraices/index.php');
 $db = conectarDB();
 
 // Obtener todos los vendedores
@@ -95,8 +100,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
-require '../../includes/funciones.php';
 incluirTemplate('header');
 ?>
 

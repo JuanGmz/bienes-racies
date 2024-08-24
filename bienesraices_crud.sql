@@ -28,3 +28,11 @@ CREATE TABLE IF NOT EXISTS propiedades(
     vendedorID  INT NOT NULL,
     FOREIGN KEY(vendedorID) REFERENCES vendedores(vendedorID)
 );
+
+DROP TABLE IF EXISTS usuarios;
+
+CREATE TABLE IF NOT EXISTS usuarios(
+	usuarioID INT(1) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    email VARCHAR(50),
+    password CHAR(60)
+);

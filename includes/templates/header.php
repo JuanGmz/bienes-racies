@@ -1,3 +1,10 @@
+<?php
+    // Es necesario iniciar las sesión para usar la superglobal $_SESSION -- verificar que no este definida para evitar errores
+    if(!isset($_SESSION))
+        session_start();
+
+    $auth = $_SESSION['login'] ?? false;
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -28,6 +35,13 @@
                         <a href="/bienesraices/anuncios.php">Anuncios</a>
                         <a href="/bienesraices/blog.php">Blog</a>
                         <a href="/bienesraices/contacto.php">Contacto</a>
+                        <?php if ($auth) : ?>
+                            <a href="/bienesraices/admin/index.php">Administrar</a>
+                            <a href="/bienesraices/cerrar-sesion.php">Cerrar Sesión</a>
+                        <?php endif; ?>
+                        <?php if (!$auth) : ?>
+                            <a href="/bienesraices/login.php">Iniciar Sesión</a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div><!-- Cierre de Barra -->

@@ -1,4 +1,11 @@
 <?php
+    require '../includes/funciones.php';
+    // Esta funcion nos indica si esta autenticado
+    $auth = autenticado();
+    // Si no hay sesión redireccionar
+    if(!$auth)
+        header('Location: /bienesraices/index.php');
+
     // Traer el archivo de la base de datos
     require '../includes/config/database.php';
     // Conectar a la base de datos
@@ -44,7 +51,6 @@
         header('refresh:3; url=/bienesraices/admin');
     }
 
-    require '../includes/funciones.php';
     // Incluimos el header
     incluirTemplate('header');
 ?>
