@@ -9,7 +9,7 @@
         header('Location: index.php');
 
     // Importar la base de datos
-    require 'includes/config/database.php';
+    require 'includes/app.php';
     // Conectar a la base de datos
     $db = conectarDB();
     // Escribir el Query
@@ -24,7 +24,6 @@
 
     $propiedad = mysqli_fetch_assoc($resultado);
 
-    require 'includes/funciones.php';
     // Incluimos el header
     incluirTemplate('header');
 ?>
@@ -32,7 +31,7 @@
 <main class="contenedor seccion contenido-centrado">
     <h1><?php echo $propiedad['titulo']; ?></h1>
 
-    <img loading="lazy" src="build/img/destacada.jpg" alt="imgAnuncio">
+    <img loading="lazy" src="imagenes/<?php echo $propiedad['imagen']; ?>" alt="imgAnuncio">
 
     <div class="resumen-propiedad">
         <p class="precio">$<?php echo $propiedad['precio']; ?></p>

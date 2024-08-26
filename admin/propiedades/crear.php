@@ -1,6 +1,5 @@
 <?php
-require '../../includes/config/database.php';
-require '../../includes/funciones.php';
+require '../../includes/app.php';
 // Esta funcion nos indica si esta autenticado
 $auth = autenticado();
 // Si no hay sesión redireccionar

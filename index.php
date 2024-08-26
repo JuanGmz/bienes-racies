@@ -1,6 +1,6 @@
 <?php
 
-    require 'includes/funciones.php';
+    require 'includes/app.php';
     $inicio = true;
     // Uso de la funcion incluirTemplate para mostrar el header
     incluirTemplate('header', $inicio);

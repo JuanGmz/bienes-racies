@@ -1,6 +1,4 @@
 <?php
-    // Importar la base de datos
-    require 'includes/config/database.php';
     // Conectar a la base de datos
     $db = conectarDB();
     // Escribir el Query

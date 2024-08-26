@@ -1,13 +1,11 @@
 <?php
-    require '../includes/funciones.php';
+    require '../includes/app.php';
     // Esta funcion nos indica si esta autenticado
     $auth = autenticado();
     // Si no hay sesión redireccionar
     if(!$auth)
         header('Location: /bienesraices/index.php');
 
-    // Traer el archivo de la base de datos
-    require '../includes/config/database.php';
     // Conectar a la base de datos
     $db = conectarDB();
     // Escribir el Query
