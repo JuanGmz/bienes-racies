@@ -10,16 +10,18 @@
         include TEMPLATES_URL . "/$nombre.php"; 
     }
 
-    function autenticado() : bool{
+    function autenticado(){
         // Iniciar sesión
         session_start();
-
         // Acceder al arreglo de sesión y verificar si el login es true
-        $auth = $_SESSION['login'];
+        if(!$_SESSION['login'])
+            header('location: /bienesraices/index.php');
+    }
 
-        if($auth)
-            return true;
-            
-        return false;
-
+    // Funcion que ayuda a ver lo que hacemos
+    function debugear($variable) {
+        echo '<pre>';
+        var_dump($variable);
+        echo '</pre>';
+        exit;
     }

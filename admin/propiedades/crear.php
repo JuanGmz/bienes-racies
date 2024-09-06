@@ -1,10 +1,12 @@
 <?php
 require '../../includes/app.php';
+
+use App\Propiedad;
+
 // Esta funcion nos indica si esta autenticado
-$auth = autenticado();
-// Si no hay sesión redireccionar
-if(!$auth)
-    header('Location: /bienesraices/index.php');
+autenticado();
+
+// Conexión a la base de datos
 $db = conectarDB();
 
 // Obtener todos los vendedores
@@ -12,7 +14,7 @@ $query = "SELECT * FROM vendedores";
 $resultadoVendedores = mysqli_query($db, $query); // Cambié el nombre de la variable
 
 // Arreglo con mensajes de error
-$errores = [];
+$errores = Propiedad::getErrores();
 
 $titulo = '';
 $precio = '';
@@ -27,53 +29,17 @@ $imagen = '';
 // Si el método es POST se envía el formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // $numero = 1;
-    // $numero2 = 'HOLA2';
-    // Sanitizar los datos -- Ejemplo: esta función elimina lo que no son INT
-    // $resultado =  filter_var($numero2, FILTER_SANITIZE_SPECIAL_CHARS);
-    // $resultado2 =  filter_var($numero2, FILTER_VALIDATE_INT);
-    // var_dump($resultado);
-    // var_dump($resultado2);
+    $propiedad = new Propiedad($_POST);
 
-    // Asignar los valores al arreglo $_POST
-    $titulo = mysqli_real_escape_string($db, $_POST['titulo']);
-    $precio = mysqli_real_escape_string($db, $_POST['precio']);
-    $descripcion = mysqli_real_escape_string($db, $_POST['descripcion']);
-    $habitaciones = mysqli_real_escape_string($db, $_POST['habitaciones']);
-    $wc = mysqli_real_escape_string($db, $_POST['wc']);
-    $estacionamiento = mysqli_real_escape_string($db, $_POST['estacionamiento']);
-    $vendedorid = mysqli_real_escape_string($db, $_POST['vendedorid'] ?? '');
-    $creado = date('Y/m/d');
-    // Asignar files hacia una variable
-    $imagen = $_FILES['imagen'];
-
-    // Validaciones
-    if (!$titulo)
-        $errores[] = "Debes añadir un título";
-    if (!$precio)
-        $errores[] = "Debes añadir un precio";
-    if (!$imagen['name'])
-        $errores[] = "Debes añadir una imagen";
-    // Validar tamaño a 1MB
-    $medida = 1000 * 1000;
-    if ($imagen['size'] > $medida)
-        $errores[] = "La imagen es muy pesada";
-    if (strlen($descripcion) < 50)
-        $errores[] = "La descripción es demasiado corta";
-    if (!$habitaciones)
-        $errores[] = "Debes añadir el número de habitaciones";
-    if (!$wc)
-        $errores[] = "Debes añadir el número de baños";
-    if (!$estacionamiento)
-        $errores[] = "Debes añadir el número de estacionamientos";
-    if (!$vendedorid)
-        $errores[] = "Debes añadir un vendedor";
-
-
+    $errores = $propiedad->validar();
 
     // Revisar que el arreglo de errores esté vacío
     if (empty($errores)) {
-
+        $propiedad->guardar();
+    
+        // Asignar files hacia una variable
+        $imagen = $_FILES['imagen'];
+        
         // Crear carpeta para subir imagenes
         $carpetaImagenes = '../../imagenes/';
         // Crear carpeta, is_dir comprueba si existe la carpeta
@@ -83,13 +49,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Generar un nombre unico -- md5 genera un identificador unico, rand() genera un numero aleatorio, true es para que se genere en binario, .jpg es el formato
         $nombreImagen = md5(uniqid(rand(), true)) . '.jpg';
-
         // Subir la imagen -- move_uploaded_file mueve el archivo a la carpeta de imagenes, toma el nombre de la imagen y la ruta
         move_uploaded_file($imagen['tmp_name'], $carpetaImagenes . $nombreImagen);
-
         // Insertar en la base de datos
-        $query = "INSERT INTO propiedades (titulo, precio, imagen, descripcion, habitaciones, wc, estacionamiento, creado, vendedorID) 
-                  VALUES ('$titulo', '$precio', '$nombreImagen', '$descripcion', '$habitaciones', '$wc', '$estacionamiento', '$creado', '$vendedorid')";
 
         $resultadoInsert = mysqli_query($db, $query);
 

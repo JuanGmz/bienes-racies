@@ -1,10 +1,9 @@
 <?php
 require '../../includes/app.php';
+
 // Esta funcion nos indica si esta autenticado
-$auth = autenticado();
-// Si no hay sesión redireccionar
-if (!$auth)
-    header('Location: /bienesraices/index.php');
+autenticado();
+
 // Obtener los datos de la propiedad desde el a de actualizar
 $id = $_GET['id'];
 
