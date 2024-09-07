@@ -2,7 +2,7 @@
     // Conectar a la base de datos
     $db = conectarDB();
     // Escribir el Query
-    $query = "SELECT * FROM propiedades LIMIT $limite";
+    $query = "SELECT * FROM propiedades LIMIT 3";
     // Obtener los resultados
     $resultado = mysqli_query($db, $query);
 
