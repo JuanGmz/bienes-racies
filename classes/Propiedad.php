@@ -16,7 +16,7 @@
             self::$db = $database;
         }
 
-        public $id;
+        public $propiedadID;
         public $titulo;
         public $precio;
         public $imagen;
@@ -28,21 +28,30 @@
         public $vendedorID;
 
         public function __construct($args = []) {
-            $this->id = $args['id'] ?? '';
+            $this->propiedadID = $args['id'] ?? '';
             $this->titulo = $args['titulo'] ?? '';
             $this->precio = $args['precio'] ?? '';
-            $this->imagen = $args['imagen'] ?? 'imagen.jpg';
+            $this->imagen = $args['imagen'] ?? '';
             $this->descripcion = $args['descripcion'] ?? '';
             $this->habitaciones = $args['habitaciones'] ?? '';
             $this->wc = $args['wc'] ?? '';
             $this->estacionamiento = $args['estacionamiento'] ?? '';
             $this->creado = date('Y/m/d');
-            $this->vendedorID = $args['vendedorid'] ?? '';
+            $this->vendedorID = $args['vendedorid'] ?? 1;
         }
 
         public function guardar() {
+            if (isset($this->propiedadID)) {
+                // Actualizar
+                $this->actualizar();
+            } else {
+                // Crear nuevo registro
+                $this->crear();
+            }
+        }
 
-            // Sanitizar los datos con POO
+        public function crear() {
+            // Sanitizar los datos
             $atributos = $this->sanitizar();
 
             // Recorre las llaves y se inserta en una cadena en la tabla
@@ -51,7 +60,45 @@
 
             $resultado = self::$db->query($query);
 
-            debugear($resultado);
+            if ($resultado) {
+                // Redireccionar al usuario a admin
+                header ('Location: /bienesraices/admin?resultado=1');
+            }
+        }
+
+        public function actualizar() {
+            // Sanitizar los datos
+            $atributos = $this->sanitizar();
+
+            $valores = [];
+
+            foreach ($atributos as $key => $value) {
+                $valores[] = "{$key}='{$value}'";
+            }
+
+            $query = "UPDATE propiedades SET ";
+            $query .= join(', ', $valores);
+            $query .= " WHERE propiedadID = '" . self::$db->escape_string($this->propiedadID) . "' ";
+            $query .= " LIMIT 1";
+
+            $resultado = self::$db->query($query);
+
+            if ($resultado) {
+                // Redireccionar al usuario a admin
+                header('Location: /bienesraices/admin?resultado=2');
+            }
+        }
+
+
+        public function eliminar() {
+            $query = "DELETE FROM propiedades WHERE propiedadID = " . self::$db->escape_string($this->propiedadID) . " LIMIT 1";
+
+            $resultado = self::$db->query($query);
+
+            if ($resultado) {
+                $this->borrarImagen();
+                header('Location: /bienesraices/admin?resultado=3');
+            }
         }
 
         public function atributos() {
@@ -78,6 +125,26 @@
             return $sanitizado;
         }
 
+        public function setImage($imagen) {
+            // Elimina la imagen previa
+            if (isset($this->propiedadID)) {
+                $this->borrarImagen();
+            }
+            
+            // Asignar imagen
+            if($imagen) {
+                $this->imagen = $imagen;
+            }
+        }
+
+        public function borrarImagen() {
+            $existeArchivo = file_exists(CARPETA_IMAGENES . $this->imagen);
+
+            if ($existeArchivo) {
+                unlink(CARPETA_IMAGENES . $this->imagen);
+            }
+        }   
+
         // Validación
         public static function getErrores() {
             return self::$errores;
@@ -91,7 +158,7 @@
             if (!$this->precio)
                 self::$errores[] = "Debes añadir un precio";
 
-            if (!$this->imagen['name'])
+            if (!$this->imagen)
                 self::$errores[] = "Debes añadir una imagen";
 
             if (strlen($this->descripcion) < 50)
@@ -109,11 +176,68 @@
             if (!$this->vendedorID)
                 self::$errores[] = "Debes añadir un vendedor";
 
-            // Validar tamaño a 1MB
-            $medida = 1000 * 1000;
-            if ($this->imagen['size'] > $medida)
-                self::$errores[] = "La imagen es muy pesada";
-
             return self::$errores;
+        }
+
+        // Listar todas las propiedades
+        public static function all() {
+            $query = "SELECT * FROM propiedades";
+
+            $resultado = self::consultarSQL($query);
+
+            return $resultado;
+        }
+
+        // BUscar una propiedad por su id
+        public static function find($id) {
+            // Obtener los datos de la propiedad
+            $query = "SELECT * FROM propiedades WHERE propiedadID = $id";
+
+            $resultado = self::consultarSQL($query);
+
+            return array_shift($resultado);
+        }
+
+        public static function consultarSQL($query) {
+            // Consultar la base de datos
+            $resultado = self::$db->query($query);
+
+            // Iterar los resultados
+            $array = [];
+
+            while($registro = $resultado->fetch_assoc()) {
+                $array[] = self::crearObjeto($registro);
+            }
+
+            // Liberar la memoria con el metodo free
+            $resultado->free();
+
+            // Retornar los resultados
+            return $array;
+        }
+
+        protected static function crearObjeto($registro) {
+            $objeto = new self;  // Crear una nueva instancia de la clase Propiedad
+        
+            // Asignar los valores del registro al objeto
+            foreach ($registro as $key => $value) {
+                if (property_exists($objeto, $key)) {
+                    $objeto->$key = $value;  // Asignar la propiedad al objeto
+                }
+            }
+        
+            return $objeto;  // Retornar el objeto creado
+        }
+        
+
+        // Sincronizar los objetos en memoria
+        public function sincronizar($args = []) {
+            foreach ($args as $key => $value) {
+                if(property_exists($this, $key) && !is_null($value)) {
+                    $this->$key = $value;
+                }
+            }
+
+            return $args;
         }
     }

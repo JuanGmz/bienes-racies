@@ -1,17 +1,19 @@
 <?php
     require '../includes/app.php';
+
+    use App\Propiedad;
+
     // Esta funcion nos indica si esta autenticado
     autenticado();
 
     // Conectar a la base de datos
     $db = conectarDB();
-    // Escribir el Query
-    $query = "SELECT * FROM propiedades";
-    // Consultar la base de datos
-    $resultadoPropiedades = mysqli_query($db, $query);
+
+    // Implementar método para obtener todas las propiedades 
+    $propiedades = Propiedad::all();
 
     // Muestra mensaje condicional, Si no existe el valor de la variable resultado, se inicializa en null
-    $resultado = $_GET['resul tado'] ?? null;
+    $resultado = $_GET['resultado'] ?? null;
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Extraer los valores del form
@@ -19,26 +21,12 @@
         // Sanitizar el ID
         $id = filter_var($id, FILTER_VALIDATE_INT);
 
+
         // Si existe el ID se elimina la propiedad
         if ($id) {
-            // Eliminar imagen
+            $propiedad = Propiedad::find($id);
 
-            // Query para obtener la imagen
-            $query = "SELECT imagen FROM propiedades WHERE propiedadID = $id";
-            // Obtener el resultado
-            $resultado = mysqli_query($db, $query);
-            // Guardar el resultado en una variable
-            $propiedad = mysqli_fetch_assoc($resultado);
-            // Eliminar la imagen con unlink
-            unlink('../imagenes/' . $propiedad['imagen']);  
-
-            // Eliminar propiedad
-            $query = "DELETE FROM propiedades WHERE propiedadID = $id";
-            $resultado = mysqli_query($db, $query);
-
-            if ($resultado) {
-                header('Location: /bienesraices/admin?resultado=3');
-            }
+            $propiedad->eliminar();
         }
     }
 
@@ -76,24 +64,24 @@
             </thead>
 
             <tbody> <!-- Mostrar los resultados de la base de datos -->
-                <?php while ($propiedad = mysqli_fetch_assoc($resultadoPropiedades)) : ?>
+                <?php foreach($propiedades as $propiedad) : ?>
                 <tr>
-                    <td><?php echo $propiedad['propiedadID']; ?></td>
-                    <td><?php echo $propiedad['titulo']; ?></td>
+                    <td><?php echo $propiedad->propiedadID; ?></td>
+                    <td><?php echo $propiedad->titulo; ?></td>
                     <td>
-                        <img src="../imagenes/<?php echo $propiedad['imagen']; ?>" alt="imagenPropiedad" class="imagen-tabla">
+                        <img src="../imagenes/<?php echo $propiedad->imagen; ?>" alt="imagenPropiedad" class="imagen-tabla">
                     </td>
-                    <td>$<?php echo $propiedad['precio']; ?></td>
+                    <td>$<?php echo $propiedad->precio; ?></td>
                     <td>
                         <form method="POST" class="w-100">
                             <!-- Agregar un input oculto para enviar el id de la propiedad -->
-                            <input type="hidden" name="id" value="<?php echo $propiedad['propiedadID']; ?>">
+                            <input type="hidden" name="id" value="<?php echo $propiedad->propiedadID; ?>">
                             <input type="submit" class="boton-rojo-block" value="Eliminar">
                         </form>
-                        <a href="propiedades/actualizar.php?id=<?php echo $propiedad['propiedadID']; ?>" class="boton-amarillo-block">Actualizar</a>
+                        <a href="propiedades/actualizar.php?id=<?php echo $propiedad->propiedadID; ?>" class="boton-amarillo-block">Actualizar</a>
                     </td>
                 </tr>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
             </tbody>
         </table>
     </main>
